@@ -16,6 +16,7 @@ endif
 SRCDIR := source
 INCDIR := include
 CFLAGS ?= -g -Wall -Wextra -I$(INCDIR)
+LDFLAGS ?=
 BUILDDIR := build
 OBJDIR := $(BUILDDIR)/obj
 
@@ -35,6 +36,21 @@ TARGET := $(BUILDDIR)/sim$(EXE)
 
 all: dirs $(TARGET)
 
+# Optional OpenMP support: enable with `make OMP=1`
+OMP ?= 0
+ifeq ($(OMP),1)
+	CCVERSION := $(shell $(CC) --version 2>/dev/null)
+	ifneq (,$(findstring clang,$(CCVERSION)))
+		# Clang (e.g., Apple clang) typically needs libomp installed
+		CFLAGS += -Xpreprocessor -fopenmp
+		LDFLAGS += -lomp
+	else
+		# GCC and compatibles
+		CFLAGS += -fopenmp
+		LDFLAGS += -fopenmp
+	endif
+endif
+
 dirs:
 ifeq ($(OS),Windows_NT)
 	@if not exist "$(BUILDDIR)" mkdir "$(BUILDDIR)"
@@ -45,7 +61,7 @@ endif
 
 $(TARGET): $(OBJS)
 	@echo "Linking $@ with $(CC)"
-	$(CC) $(CFLAGS) $^ -o $@ -lm
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) -lm
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | dirs
 	@echo "Compiling $<"

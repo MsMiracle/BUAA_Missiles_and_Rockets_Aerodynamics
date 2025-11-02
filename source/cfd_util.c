@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* 全局数组定义（在头文件中用 extern 声明） */
 f64 vel[NX];
@@ -53,6 +56,9 @@ f64 * updateRho(f64 time){
         printf("[ERROR] Memory allocation failed during rho update at %.8f sec", time);
         exit(-1);
     }
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (int i = 1; i < NX - 1; i ++){
         f64 _prho_pt = prho_pt(i);
         f64 _pprho_ppt = pprho_ppt(i, time);
@@ -70,6 +76,9 @@ f64 * updateVelocity(f64 time){
         printf("[ERROR] Memory allocation failed during vel update at %.8f sec", time);
         exit(-1);
     }
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (int i = 1; i < NX - 1; i ++){
         new_vel[i] = vel[i] + DT * pvx_pt(i, time) + HALF_DT2 * ppvx_ppt(i, time);
     }
@@ -84,6 +93,9 @@ f64 * updatePressure(f64 time){
         printf("[ERROR] Memory allocation failed during pres update at %.8f sec", time);
         exit(-1);
     }
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (int i = 0; i < NX; i ++){
         new_pres[i] = R / MU_STAR * rho[i] * T_INIT;
     }
