@@ -45,7 +45,7 @@ endif
 
 $(TARGET): $(OBJS)
 	@echo "Linking $@ with $(CC)"
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | dirs
 	@echo "Compiling $<"
