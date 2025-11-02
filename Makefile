@@ -36,7 +36,12 @@ TARGET := $(BUILDDIR)/sim$(EXE)
 all: dirs $(TARGET)
 
 dirs:
+ifeq ($(OS),Windows_NT)
+	@if not exist "$(BUILDDIR)" mkdir "$(BUILDDIR)"
+	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
+else
 	@mkdir -p $(BUILDDIR) $(OBJDIR)
+endif
 
 $(TARGET): $(OBJS)
 	@echo "Linking $@ with $(CC)"
