@@ -8,6 +8,12 @@ project(cfd_sim C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# 默认开启 -O2 优化（可通过 CMAKE_BUILD_TYPE=Debug 禁用）
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
+
 # 2. Project Structure and Executable Definition
 # Add the 'include' directory to the include path
 include_directories(include)
