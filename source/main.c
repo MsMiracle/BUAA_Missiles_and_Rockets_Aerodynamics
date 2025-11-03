@@ -45,26 +45,30 @@ i32 main(i32 argc, char **argv){
         free(new_rho);
         free(new_pres);
         free(new_vel);
-        system("clear");
 
-        // ETA Calculation
-        char eta_str[32] = "ETA: --:--:--";
-        if (step > 10) { // Start calculating after a few steps for stability
-            clock_t current_clock = clock();
-            double elapsed_secs = (double)(current_clock - start_clock) / CLOCKS_PER_SEC;
-            double steps_per_sec = (double)step / elapsed_secs;
-            double remaining_secs = (double)(maxSteps - step) / steps_per_sec;
+        if (step % PRINT_AFTER_STEPS == 0 || step == maxSteps - 1) {
+            system("clear");
 
-            int hours = (int)(remaining_secs / 3600);
-            int minutes = (int)((remaining_secs - (hours * 3600)) / 60);
-            int seconds = (int)remaining_secs % 60;
-            sprintf(eta_str, "ETA: %02d:%02d:%02d", hours, minutes, seconds);
+            // ETA Calculation
+            char eta_str[32] = "ETA: --:--:--";
+            if (step > 10) { // Start calculating after a few steps for stability
+                clock_t current_clock = clock();
+                double elapsed_secs = (double)(current_clock - start_clock) / CLOCKS_PER_SEC;
+                double steps_per_sec = (double)step / elapsed_secs;
+                double remaining_secs = (double)(maxSteps - step) / steps_per_sec;
+
+                int hours = (int)(remaining_secs / 3600);
+                int minutes = (int)((remaining_secs - (hours * 3600)) / 60);
+                int seconds = (int)remaining_secs % 60;
+                sprintf(eta_str, "ETA: %02d:%02d:%02d", hours, minutes, seconds);
+            }
+
+            printf("t=%.8f step=%d/%d (%.2f%%) %s | rho[0]=%.8f vel[0]=%.8f pres[0]=%.8f\n",
+                   t, step, maxSteps, (double)step / maxSteps * 100.0, eta_str,
+                   rho[0], vel[0], pres[0]);
+            fflush(stdout);
         }
 
-        printf("t=%.8f step=%d/%d (%.2f%%) %s | rho[0]=%.8f vel[0]=%.8f pres[0]=%.8f\n",
-               t, step, maxSteps, (double)step / maxSteps * 100.0, eta_str,
-               rho[0], vel[0], pres[0]);
-        fflush(stdout);
         t += DT;
         if (t > total_timer){
             total_timer += TIMER;

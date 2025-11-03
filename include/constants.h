@@ -31,5 +31,6 @@
 #define T_END 3.0                      // 结束时间 (s)
 
 #define TIMER 1e-2                      // 保存时间间隔 (s)
+#define PRINT_AFTER_STEPS 100           // 每隔多少步更新一次终端输出
 
 #endif /* __CONSTANTS_H */
