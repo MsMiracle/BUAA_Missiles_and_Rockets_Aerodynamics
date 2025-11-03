@@ -1,6 +1,6 @@
 # 导弹与运载火箭气动计算大作业
 ## 题设
-一个无限长的光滑直线导管，横截面积为1$m^2$，导管内有一个活塞，质量为1$kg$，左侧为真空，右侧充满空气。
+一个无限长的光滑直线导管，横截面积为 $1\,m^2$，导管内有一个活塞，质量为 $1\,kg$，左侧为真空，右侧充满空气。
 
 初始时刻活塞和空气都静止。之后，活塞收到向右的推动力，产生加速度为：
 $$a=\left\{\begin{aligned}
@@ -10,7 +10,7 @@ $$a=\left\{\begin{aligned}
 &0& 40s<t\leq60s
 \end{aligned}\right.$$
 
-流场的温度恒定为20摄氏度，初始时刻空气的密度和压强都均匀，分别为1.205$kg/m^3$和1.0117$\times 10^5 Pa$，不考虑粘性，求活塞在60秒内的运动情况，以及流场在各个时刻的密度、速度和压强分布。
+流场的温度恒定为20摄氏度，初始时刻空气的密度和压强都均匀，分别为 $1.205\,kg/m^3$ 和 $1.0117 \times 10^5 Pa$，不考虑粘性，求活塞在60秒内的运动情况，以及流场在各个时刻的密度、速度和压强分布。
 
 ## 迭代方法
 使用二阶展开的差分方程对离散后的流场进行迭代计算，具体差分方程如下：
@@ -50,38 +50,15 @@ $$P=\frac{R}{\mu^\ast}\rho^\prime T$$
 本项目中采用的默认参数如下：
 ```c
 DX = 1e-3        // 空间步长，单位：米
-DT = 5e-7        // 时间步长，单位：秒
+DT = 2e-6        // 时间步长，单位：秒
 ```
 
-## 可视化（visualizations.py）
-脚本位置：`vispy/visualizations.py`
-
-- 参数：
-  - `--field {rho, vel, pres}` 选择要显示的物理量
-  - `--file PATH` 指定某个快照 CSV 文件（不指定则自动选择 build/ 下最新）
-  - `--watch` 动态刷新，持续读取 build/ 下最新 CSV
-  - `--interval SECONDS` 监听刷新间隔（默认 0.5s，仅在 `--watch` 下生效）
-  - `--y-repeat N` 伪造 y 维复制行数（默认 50）
-  - `--cmap NAME` Matplotlib 色图（默认 viridis）
-  - `--vmin V` / `--vmax V` 固定色标范围（可选，便于多帧对比）
-  - `--save PATH` 保存图片（PNG），与 `--no-show` 搭配可无界面出图
-  - `--no-show` 不弹出窗口
-
-- 推荐命令：
-  - 实时查看密度并自动刷新：
-    ```bash
-    python vispy/visualizations.py --field rho --watch
-    ```
-  - 固定色标的速度场，0.2s 刷新：
-    ```bash
-    python vispy/visualizations.py --field vel --watch --interval 0.2 --vmin -5 --vmax 5
-    ```
-  - 渲染指定快照并保存图片：
-    ```bash
-    python vispy/visualizations.py --field pres --file build/snapshot_1.000000e-03.csv --save out.png --no-show
-    ```
-
-依赖：Python 3、numpy、matplotlib（如未安装，可执行 `pip install numpy matplotlib`）。
+## 数据可视化方法
+- 推荐指令：
+```bash
+python vispy/visualizations.py --field pres --play-all --interval 0.2 --no-lock-scale
+```
+该指令将播放所有快照文件，显示压强分布，刷新间隔为 0.2 秒，且不锁定色标范围。
 
 ## 步长选择（DX 与 DT）
 为了保证显式推进的数值稳定性与准确性，请参考以下约束：
@@ -139,14 +116,14 @@ DT = 5e-7        // 时间步长，单位：秒
   // 如果不需要多线程，运行以下即可
   cmake .. -DOPENMP=OFF
   ```
-- 编译项目：
+- 编译运行项目：
   ```bash
   cmake --build .
+  ./sim
   ```
 ## 作者
-*Mingze Qiu, School of Astronautics, BUAA*
 
-*e-mail: qiumingze@buaa.edu.cn*
-
+*Author:* Mingze Qiu, School of Astronautics, Beihang University.  
+*Email:* <qiumingze@buaa.edu.cn>
 ## 许可证
 本项目采用 MIT License，欢迎自由使用和修改。
