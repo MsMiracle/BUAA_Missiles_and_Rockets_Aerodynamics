@@ -22,15 +22,14 @@
 #define RHO_INIT (P_INIT * MU_STAR / (R * T_INIT)) // 初始密度 (kg/m^3)
 #define K (R * T_INIT) / MU_STAR
 
-#define NX 100000                      // X 方向的仿真点数（细网格）
-#define DX 0.00001                     // X 方向的空间步长 (m)
+#define NX 2000                         // X 方向的仿真点数（细网格）
+#define DX 1e-3                         // X 方向的空间步长 (m)
 
-// 时间相关常数
-#define DT 1e-8                        // 时间步长 (s) — 为满足细网格下的 CFL 条件
-#define HALF_DT2 (DT * DT) / 2         // 二阶时间项系数
-#define T_END 3.0                      // 结束时间 (s)
+#define DT 2e-6                         // 时间步长 (s)
+#define HALF_DT2 (DT * DT) / 2          // 二阶时间项系数
+#define T_END 60.0                      // 结束时间 (s)
 
-#define TIMER 1e-2                      // 保存时间间隔 (s)
+#define TIMER 1e-1                      // 保存时间间隔 (s)
 #define PRINT_AFTER_STEPS 100           // 每隔多少步更新一次终端输出
 
 #endif /* __CONSTANTS_H */
