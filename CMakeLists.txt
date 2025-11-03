@@ -5,7 +5,10 @@ cmake_minimum_required(VERSION 3.15)
 project(cfd_sim C)
 
 # Set C standard for portability
-set(CMAKE_C_STANDARD 11)
+# Use C99 to allow declaring loop variables in the for-head on compilers
+# that support it (GCC/Clang will get -std=c99). MSVC ignores this and
+# continues to use its default C dialect.
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # 默认开启 -O2 优化（可通过 CMAKE_BUILD_TYPE=Debug 禁用）

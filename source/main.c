@@ -17,6 +17,12 @@
 #include <omp.h>
 #endif
 
+#ifdef _WIN32
+#define CLEAR "cls"
+#else
+#define CLEAR "clear"
+#endif
+
 i32 main(i32 argc, char **argv){
 #ifdef _OPENMP
     printf("[INFO] OpenMP is enabled, running with %d threads.\n", omp_get_max_threads());
@@ -47,7 +53,8 @@ i32 main(i32 argc, char **argv){
         free(new_vel);
 
         if (step % PRINT_AFTER_STEPS == 0 || step == maxSteps - 1) {
-            system("clear");
+            system(CLEAR);
+
 
             // ETA Calculation
             char eta_str[32] = "ETA: --:--:--";
