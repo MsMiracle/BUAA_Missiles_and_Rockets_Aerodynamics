@@ -15,7 +15,7 @@ endif
 
 SRCDIR := source
 INCDIR := include
-CFLAGS ?= -g -Wall -Wextra -I$(INCDIR)
+CFLAGS ?= -g -O2 -Wall -Wextra -I$(INCDIR)
 LDFLAGS ?=
 BUILDDIR := build
 OBJDIR := $(BUILDDIR)/obj
