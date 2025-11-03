@@ -14,13 +14,25 @@ $$a=\left\{\begin{aligned}
 
 ## 迭代方法
 使用二阶展开的差分方程对离散后的流场进行迭代计算，具体差分方程如下：
-- 连续性方程：
-$$\frac{\partial\rho}{\partial t}=-v_x\frac{\partial\rho}{\partial x}-\rho\frac{\partial v_x}{\partial x}$$
-- 动量方程：
-$$\frac{\partial v_x}{\partial t}=-v_x\frac{\partial v_x}{\partial x}-\frac{K}{\rho}\frac{\partial P}{\partial x}-a$$
-- 状态方程：
-$$P=\frac{R}{\mu^\ast}\rho T$$
-其中 $K=\frac{RT}{\mu^\ast}$
+$$\left\{
+  \begin{aligned}
+    \rho^\prime \approx \rho+\frac{\partial\rho}{\partial t}\Delta t + \frac{\partial^2\rho}{\partial t^2}\frac{\Delta t^2}{2}\\
+    \,\\
+    v^\prime \approx v+\frac{\partial v}{\partial t}\Delta t + \frac{\partial^2 v}{\partial t^2}\frac{\Delta t^2}{2}
+  \end{aligned}
+  \right.$$
+其中，
+$$\left\{\begin{aligned}
+\frac{\partial^2\rho}{\partial t^2} = &-\frac{\partial \rho}{\partial x}\left(-v\frac{\partial v}{\partial x}-\frac{K\partial\rho}{\rho\partial x}-a\right)\\
+&-v\left(-\frac{\partial v}{\partial x}-v\frac{\partial^2\rho}{\partial x^2}-\frac{\partial \rho}{\partial x}\frac{\partial v}{\partial x}-\rho\frac{\partial ^2v}{\partial x^2}\right)\\
+&-\frac{\partial v}{\partial x}\left(-v\frac{\partial\rho}{\partial x}-\rho\frac{\partial v}{\partial x}\right)\\
+&-\rho\left(-\frac{\partial v}{\partial x}\frac{\partial v}{\partial x}-v\frac{\partial^2v}{\partial x^2}+\frac{K}{\rho^2}\frac{\partial\rho}{\partial x}\frac{\partial \rho}{\partial x} - \frac{K}{\rho}\frac{\partial^2\rho}{\partial x^2}\right)\\
+\frac{\partial^2v}{\partial t^2}= &-\frac{\partial v}{\partial x}\left(-v\frac{\partial v}{\partial x}-\frac{K}{\rho}\frac{\partial\rho}{\partial x}-a\right)\\
+&-v\left(-\frac{\partial v}{\partial x}\frac{\partial v}{\partial x}-v\frac{\partial ^2v}{\partial x^2}+\frac{K}{\rho^2}\frac{\partial\rho}{\partial x}\frac{\partial\rho}{\partial x}-\frac{K}{\rho}\frac{\partial^2\rho}{\partial x^2}\right)\\
+&+\frac{K}{\rho^2}\frac{\partial\rho}{\partial x}\left(-v\frac{\partial \rho}{\partial x}-\rho\frac{\partial v}{\partial x}\right)\\
+&-\frac{K}{\rho}\left(-\frac{\partial v}{\partial x}\frac{\partial \rho}{\partial x}-v\frac{\partial^2\rho}{\partial x^2}-\frac{\partial\rho}{\partial x}\frac{\partial v}{\partial x}-\rho\frac{\partial^2v}{\partial x^2}\right)\\
+K = &\frac{RT}{\mu^\ast}
+\end{aligned}\right.$$
 
 ## 边界条件处理
 **左边界**（活塞位置）：
@@ -30,20 +42,39 @@ $$\rho^\prime=\rho-\rho\mathrm{d}t\times\left.\frac{\partial v}{\partial x}\righ
   - 压强：通过状态方程计算
 $$P=\frac{R}{\mu^\ast}\rho^\prime T$$
 
-**右边界**（导管末端）：与倒数第二个节点状态相同。
-## 数据更新逻辑图
-```mermaid
-graph TD
-A["开始: t_i时刻的流场状态"] --> B["读取活塞加速度 a_piston"]
-B --> C["设置边界条件: v[0] = 0, P[0] = ?"]
-C --> D["遍历每个内部网格点 i=1 -> n-1"]
-D --> E["使用连续性方程更新密度 rho[i]"]
-D --> F["使用动量方程更新速度 v[i]"]
-E --> G["使用状态方程更新压强 P[i]"]
-F --> G
-G --> H{"是否遍历完所有内部节点?"}
-H -->|否| D
-H -->|是| I["更新右边界节点状态"]
-I --> J["输出 t_{i+1} 时刻的流场状态"]
-J --> K["结束"]
-```
+**右边界**（导管末端）：一阶向右差分。
+
+## 编译方法
+本项目使用CMake进行编译。为了计算效率，我们引入了 OpenMP 进行多线程加速。在编译之前请确保您的系统已经安装了 CMake 和支持 OpenMP 的编译器（如 GCC 或 Clang）。
+- 安装 OpenMP（如果尚未安装）：
+  - 对于 Ubuntu/Debian 系统，可以使用以下命令安装：
+    ```bash
+    sudo apt-get install libomp-dev
+    ```
+  - 对于 macOS 系统，可以通过 Homebrew 安装：
+    ```bash
+    brew install libomp
+    ```
+  - 对于 Windows 系统，由于编译器自带 OpenMP 支持，通常不需要额外安装。
+- 创建构建目录并进入该目录：
+  ```bash
+  mkdir build
+  cd build
+  ```
+- 运行 CMake 配置项目：
+  ```bash
+  cmake ..
+  // 如果不需要多线程，运行以下即可
+  cmake .. -DOPENMP=OFF
+  ```
+- 编译项目：
+  ```bash
+  cmake --build .
+  ```
+## 作者
+*Mingze Qiu, School of Astronautics, BUAA*
+
+*e-mail: qiumingze@buaa.edu.cn*
+
+## 许可证
+本项目采用 MIT License，欢迎自由使用和修改。
