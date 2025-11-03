@@ -40,15 +40,22 @@ all: dirs $(TARGET)
 OMP ?= 0
 ifeq ($(OMP),1)
 	CCVERSION := $(shell $(CC) --version 2>/dev/null)
-	ifneq (,$(findstring clang,$(CCVERSION)))
-		# Clang (e.g., Apple clang) typically needs libomp installed
-		CFLAGS += -Xpreprocessor -fopenmp
-		LDFLAGS += -lomp
-	else
-		# GCC and compatibles
-		CFLAGS += -fopenmp
-		LDFLAGS += -fopenmp
-	endif
+  ifneq (,$(findstring clang,$(CCVERSION)))
+    # Clang on macOS needs Homebrew's libomp path
+    LOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null)
+    ifneq ($(LOMP_PREFIX),)
+      CFLAGS += -Xpreprocessor -fopenmp -I$(LOMP_PREFIX)/include
+      LDFLAGS += -L$(LOMP_PREFIX)/lib -lomp
+    else
+      # Fallback if brew or libomp is not found
+      CFLAGS += -Xpreprocessor -fopenmp
+      LDFLAGS += -lomp
+    endif
+  else
+    # GCC and compatibles
+    CFLAGS += -fopenmp
+    LDFLAGS += -fopenmp
+  endif
 endif
 
 dirs:

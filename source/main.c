@@ -12,7 +12,17 @@
 #include "cfd_differentials.h"
 #include "constants.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 i32 main(i32 argc, char **argv){
+#ifdef _OPENMP
+    printf("[INFO] OpenMP is enabled, running with %d threads.\n", omp_get_max_threads());
+#else
+    printf("[INFO] OpenMP is not enabled, running in single-thread mode.\n");
+#endif
+    sleep(1);
     initFlowField();
 
     f64 t = 0.0;
