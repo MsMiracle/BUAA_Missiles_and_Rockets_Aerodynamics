@@ -33,6 +33,8 @@ import argparse
 import math
 import csv
 from typing import List, Tuple
+import matplotlib.pyplot as plt
+import numpy as np
 
 T = 60.0
 # Piecewise segments: (start, end, value)
@@ -98,6 +100,9 @@ def parse_args():
     p.add_argument('--export', type=str, default=None, help='Optional CSV output path')
     p.add_argument('--show-series', action='store_true', help='Print reconstructed values at sample times')
     p.add_argument('--samples', type=int, default=13, help='Number of sample times to display when --show-series used')
+    p.add_argument('--plot', action='store_true', help='Show a plot comparing original piecewise function and Fourier reconstruction')
+    p.add_argument('--plot-samples', type=int, default=2000, help='Number of time samples for plotting')
+    p.add_argument('--save-plot', type=str, default=None, help='Save the comparison plot to a file (e.g. png)')
     return p.parse_args()
 
 def main():
@@ -135,6 +140,36 @@ def main():
             if orig is None:  # t==T maps to 0
                 orig = SEGMENTS[0][2]
             print(f"t={t:8.3f}  orig={orig:4.1f}  series≈{val:10.6f}")
+
+    if args.plot:
+        # Prepare time samples
+        samples = max(10, int(args.plot_samples))
+        ts = np.linspace(0.0, T, samples, endpoint=False)
+        orig_vals = np.zeros_like(ts)
+        recon_vals = np.zeros_like(ts)
+        for i, t in enumerate(ts):
+            recon_vals[i] = reconstruct(t, a0, a_list, b_list)
+            # original piecewise
+            v0 = 0.0
+            for (t0, t1, v) in SEGMENTS:
+                if t0 <= t < t1:
+                    v0 = v
+                    break
+            orig_vals[i] = v0
+
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.plot(ts, orig_vals, label='Original piecewise', color='C0', linewidth=2)
+        ax.plot(ts, recon_vals, label=f'Fourier recon (N={N})', color='C1', linewidth=1)
+        ax.set_xlabel('t (s)')
+        ax.set_ylabel('Piston acceleration (m/s^2)')
+        ax.set_title('Original piecewise acceleration vs Fourier reconstruction')
+        ax.legend()
+        ax.grid(True, linestyle='--', alpha=0.5)
+        fig.tight_layout()
+        if args.save_plot:
+            fig.savefig(args.save_plot, dpi=150)
+            print(f"[INFO] Saved plot to {args.save_plot}")
+        plt.show()
 
 if __name__ == '__main__':
     main()
