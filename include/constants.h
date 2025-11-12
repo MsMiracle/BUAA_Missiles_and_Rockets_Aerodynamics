@@ -22,10 +22,10 @@
 #define RHO_INIT (P_INIT * MU_STAR / (R * T_INIT)) // 初始密度 (kg/m^3)
 #define K (R * T_INIT) / MU_STAR
 
-#define NX 4000                         // X 方向的仿真点数（细网格）
-#define DX 5e-4                         // X 方向的空间步长 (m)
+#define NX 1000                         // X 方向的仿真点数（细网格）
+#define DX 5e-3                         // X 方向的空间步长 (m)
 
-#define DT 5e-7                         // 时间步长 (s)
+#define DT 1e-5                         // 时间步长 (s)
 #define HALF_DT2 (DT * DT) / 2          // 二阶时间项系数
 #define T_END 60.0                      // 结束时间 (s)
 

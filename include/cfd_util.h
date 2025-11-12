@@ -13,6 +13,8 @@ extern f64 vel[NX];    // 速度数组
 extern f64 pres[NX];   // 压力数组
 extern f64 rho[NX];    // 密度数组
 
+extern f64 fourierSeries[50][2];
+
 f64     getPistonAcceleration(f64 time);
 
 void    initFlowField();
