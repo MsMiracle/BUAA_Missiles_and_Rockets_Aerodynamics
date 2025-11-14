@@ -2,8 +2,6 @@
     include/cfd_util.h
     这里定义了解决一维流场问题时使用的一些工具函数
 */
-
-
 #ifndef CFD_UTIL_H
 #define CFD_UTIL_H
 

@@ -9,26 +9,20 @@
 
 f64 prho_px(i32 idx){
     if (idx == 0){
-        /* 左边界：一阶前向差分 */
         return (rho[1] - rho[0]) / DX;
     } else if (idx == NX - 1){
-        /* 右边界：一阶后向差分 */
         return (rho[NX - 1] - rho[NX - 2]) / DX;
     } else {
-        /* 内部：二阶中心差分 */
         return (rho[idx + 1] - rho[idx - 1]) / (2 * DX);
     }
 }
 
 f64 pvx_px(i32 idx){
     if (idx == 0){
-        /* 左边界：一阶前向差分 */
         return (vel[1] - vel[0]) / DX;
     } else if (idx == NX - 1){
-        /* 右边界：一阶后向差分 */
         return (vel[NX - 1] - vel[NX - 2]) / DX;
     } else {
-        /* 内部：二阶中心差分 */
         return (vel[idx + 1] - vel[idx - 1]) / (2 * DX);
     }
 }
@@ -41,13 +35,10 @@ f64 prho_pt(i32 idx){
 
 f64 pprho_ppx(i32 idx){
     if (idx == 0){
-        /* 左边界：二阶单边差分 (forward) */
         return (2*rho[0] - 5*rho[1] + 4*rho[2] - rho[3]) / (DX * DX);
     } else if (idx == NX - 1){
-        /* 右边界：二阶单边差分 (backward) */
         return (2*rho[NX-1] - 5*rho[NX-2] + 4*rho[NX-3] - rho[NX-4]) / (DX * DX);
     } else {
-        /* 内部：二阶中心差分 */
         return (rho[idx + 1] - 2 * rho[idx] + rho[idx - 1]) / (DX * DX);
     }
 }
