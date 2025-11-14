@@ -36,6 +36,7 @@ from typing import List, Tuple, Optional
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401  # 激活 3D 投影
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_BUILD_DIR = os.path.join(ROOT_DIR, 'build')
@@ -147,7 +148,7 @@ def build_xt_field(build_dir: str, field: str, NX: int) -> Tuple[np.ndarray, np.
     return times, x_idx, F
 
 
-def plot_xt_surface(times: np.ndarray, x_idx: np.ndarray, F: np.ndarray, field: str, DX: float,
+def plot_xt_heatmap(times: np.ndarray, x_idx: np.ndarray, F: np.ndarray, field: str, DX: float,
                      save: Optional[str] = None, show: bool = True,
                      interpolate: bool = False) -> None:
     """绘制 x-t 色彩图（将值视为 z 维度）。"""
@@ -192,16 +193,70 @@ def plot_xt_surface(times: np.ndarray, x_idx: np.ndarray, F: np.ndarray, field: 
     else:
         plt.close(fig)
 
+def plot_xt_surface3d(times: np.ndarray, x_idx: np.ndarray, F: np.ndarray, field: str, DX: float,
+                      save: Optional[str] = None, show: bool = True) -> None:
+    """绘制真正的 3D 曲面：横轴 x，纵轴 time，高度为 field 值。"""
+    # 物理坐标
+    x = x_idx * DX
+    t = times
 
+    # 构造网格：F 形状是 (nt, nx)，所以用 ij 索引保证对齐
+    T_grid, X_grid = np.meshgrid(t, x, indexing='ij')  # both (nt, nx)
+
+    # 选择标签
+    if field == 'rho':
+        zlabel = 'density (kg/m^3)'
+    elif field == 'vel':
+        zlabel = 'velocity (m/s)'
+    else:
+        zlabel = 'pressure (Pa)'
+
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # 画曲面
+    surf = ax.plot_surface(X_grid, T_grid, F,
+                           cmap='viridis',
+                           linewidth=0,
+                           antialiased=True)
+
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('time (s)')
+    ax.set_zlabel(zlabel)
+    ax.set_title(f"{field} field surface: value(t, x)")
+
+    fig.colorbar(surf, ax=ax, shrink=0.6, aspect=10, pad=0.1, label=zlabel)
+
+    # 视角可以按喜好调整
+    ax.view_init(elev=30, azim=-135)
+
+    fig.tight_layout()
+    if save:
+        os.makedirs(os.path.dirname(save) or '.', exist_ok=True)
+        fig.savefig(save, dpi=150)
+        print(f"[INFO] Saved 3D surface to {save}")
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
 def parse_args():
-    p = argparse.ArgumentParser(description='Plot rho/vel/pres as x-t surfaces from snapshot CSVs.')
+    p = argparse.ArgumentParser(
+        description='Plot rho/vel/pres as x-t fields from snapshot CSVs (2D heatmap or 3D surface).'
+    )
     p.add_argument('--field', type=str, choices=['rho', 'vel', 'pres'], required=True,
                    help='Which field to plot: rho, vel, pres')
-    p.add_argument('--build-dir', type=str, default=DEFAULT_BUILD_DIR, help='Directory containing snapshot CSVs')
-    p.add_argument('--constants', type=str, default=DEFAULT_CONSTANTS, help='Path to include/constants.h')
-    p.add_argument('--save', type=str, default=None, help='Path to save figure')
-    p.add_argument('--no-show', action='store_true', help='Do not show window (useful on servers or when saving only)')
-    p.add_argument('--interpolate', action='store_true', help='Use bilinear interpolation for smoother surfaces')
+    p.add_argument('--build-dir', type=str, default=DEFAULT_BUILD_DIR,
+                   help='Directory containing snapshot CSVs')
+    p.add_argument('--constants', type=str, default=DEFAULT_CONSTANTS,
+                   help='Path to include/constants.h')
+    p.add_argument('--save', type=str, default=None,
+                   help='Path to save figure')
+    p.add_argument('--no-show', action='store_true',
+                   help='Do not show window (useful on servers or when saving only)')
+    p.add_argument('--interpolate', action='store_true',
+                   help='Use bilinear interpolation for smoother 2D heatmap (ignored for 3D surface)')
+    p.add_argument('--mode', type=str, choices=['heatmap', 'surface'], default='surface',
+                   help="Visualization mode: 'heatmap' for 2D x-t colormap, 'surface' for 3D surface (default).")
     return p.parse_args()
 
 
@@ -209,9 +264,24 @@ def main():
     args = parse_args()
     NX, DX = parse_constants(args.constants)
     times, x_idx, F = build_xt_field(args.build_dir, args.field, NX)
-    plot_xt_surface(times, x_idx, F, field=args.field, DX=DX,
-                    save=args.save, show=not args.no_show,
-                    interpolate=args.interpolate)
+
+    if args.mode == 'heatmap':
+        # 2D 色彩图
+        plot_xt_heatmap(times, x_idx, F,
+                        field=args.field,
+                        DX=DX,
+                        save=args.save,
+                        show=not args.no_show,
+                        interpolate=args.interpolate)
+    else:
+        # 3D 曲面
+        if args.interpolate:
+            print("[WARN] --interpolate is ignored in 3D surface mode.")
+        plot_xt_surface3d(times, x_idx, F,
+                          field=args.field,
+                          DX=DX,
+                          save=args.save,
+                          show=not args.no_show)
 
 
 if __name__ == '__main__':
